@@ -14,7 +14,9 @@ namespace Martaarcadu.Infrastructure.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
-    
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
         public DbSet<SubscriptionsPlan> SubscriptionPlans { get; set; }
         public DbSet<SubscriptionPlanBenefit> SubscriptionPlanBenefits { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
