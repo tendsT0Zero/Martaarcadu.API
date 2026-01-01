@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Martaarcadu.API/Martaarcadu.API.csproj" />
+  <Project Path="Martaarcadu.Domain/Martaarcadu.Domain.csproj" />
+  <Project Path="Martaarcadu.Infrastructure/Martaarcadu.Infrastructure.csproj" />
+</Solution>
