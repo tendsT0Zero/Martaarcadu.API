@@ -32,7 +32,7 @@ namespace Martaarcadu.Domain.Entities.ApplicationUser
         public Guid? SubscriptionPlanId { get; set; }
 
         [ForeignKey("SubscriptionPlanId")]
-        public virtual SubscriptionsPlan? SubscriptionPlan { get; set; }
+        public  SubscriptionsPlan? SubscriptionPlan { get; set; }
 
 
         //Professional Info
