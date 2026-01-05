@@ -4,6 +4,7 @@ using Martaarcadu.Application.Interfaces;
 using Martaarcadu.Domain.Entities.SubscriptionPlan;
 using Martaarcadu.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using static Martaarcadu.Domain.Enums.Enums;
 
 namespace Martaarcadu.Application.Services
 {
@@ -83,6 +84,28 @@ namespace Martaarcadu.Application.Services
         {
             try
             {
+                //Validate that the Duration is a valid Enum value
+                if (!Enum.IsDefined(typeof(DurationType), dto.Duration))
+                {
+                    return new APIResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid duration type. Accepted values are: Monthly, Yearly, Free."
+                    };
+                }
+
+                //Check if the Name is unique
+                bool nameExists = await _context.SubscriptionPlans
+                    .AnyAsync(p => p.Name.ToLower() == dto.Name.ToLower()); // Case-insensitive check recommended
+
+                if (nameExists)
+                {
+                    return new APIResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "A subscription plan with this name already exists."
+                    };
+                }
                 var plan = new SubscriptionsPlan 
                 {
                     Name = dto.Name,
@@ -125,12 +148,35 @@ namespace Martaarcadu.Application.Services
         {
             try
             {
+                // Validate that the Duration is a valid Enum value
+                if (!Enum.IsDefined(typeof(DurationType), dto.Duration))
+                {
+                    return new APIResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid duration type. Accepted values are: Monthly, Yearly, Free."
+                    };
+                }
+
                 var plan = await _context.SubscriptionPlans
                     .Include(p => p.Benefits)
                     .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (plan == null)
                     return new APIResponseDto { IsSuccess = false, Message = "Plan not found." };
+
+                // Check for unique name
+                bool nameExists = await _context.SubscriptionPlans
+                    .AnyAsync(p => p.Name.ToLower() == dto.Name.ToLower() && p.Id != id);
+
+                if (nameExists)
+                {
+                    return new APIResponseDto
+                    {
+                        IsSuccess = false,
+                        Message = "A subscription plan with this name already exists."
+                    };
+                }
 
 
                 plan.Name = dto.Name;
