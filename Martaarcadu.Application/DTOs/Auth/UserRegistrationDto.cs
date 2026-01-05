@@ -1,4 +1,5 @@
 ﻿using Martaarcadu.Domain.Entities.SubscriptionPlan;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -36,8 +37,7 @@ namespace Martaarcadu.Application.DTOs.Auth
         [MaxLength(20)]
         public string ZipCode { get; set; } = string.Empty;
 
-        [MaxLength(500)]
-        public string? ProfilePhotoUrl { get; set; }
+        public IFormFile? ProfilePhoto { get; set; }
 
         [MaxLength(1000)]
         public string? AboutMe { get; set; }
