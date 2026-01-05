@@ -19,32 +19,49 @@ namespace Martaarcadu.Application.Services
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly IPhotoUploadService _photoUploadService;
 
         public AuthService(UserManager<ApplicationUser> userManager,
                            SignInManager<ApplicationUser> signInManager,
                            IConfiguration configuration,
-                           IEmailService emailService)
+                           IEmailService emailService,
+                           IPhotoUploadService photoUploadService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _emailService = emailService;
+            _photoUploadService = photoUploadService;
         }
 
         // REGISTER
         public async Task<APIResponseDto> RegisterAsync(UserRegistrationDto model)
         {
+            //Check if user exists
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
                 return new APIResponseDto { IsSuccess = false, Message = "User already exists." };
 
-            // Check password match manually
+            //Validate passwords
             if (model.Password != model.ConfirmPassword)
+                return new APIResponseDto { IsSuccess = false, Message = "Passwords do not match." };
+
+            //HANDLE PHOTO UPLOAD via Service
+            string? profileUrl = null;
+            if (model.ProfilePhoto != null)
             {
-                return new APIResponseDto { IsSuccess = false, Message = "Password Should Match with ConfirmPassword." };
+                try
+                {
+                    profileUrl = await _photoUploadService.UploadPhotoAsync(model.ProfilePhoto);
+                }
+                catch (ArgumentException ex)
+                {
+                    // Catch the validation error from the service (e.g. wrong file type)
+                    return new APIResponseDto { IsSuccess = false, Message = ex.Message };
+                }
             }
 
-            // 1. Generate OTP first
+            // Create User
             string otp = RandomNumberGenerator.GetInt32(1000, 10000).ToString();
 
             var user = new ApplicationUser
@@ -52,23 +69,25 @@ namespace Martaarcadu.Application.Services
                 Email = model.Email,
                 UserName = model.Email,
                 FullName = model.FullName,
+                Country = model.Country,
+                City = model.City,
+                ZipCode = model.ZipCode,
+
+                ProfilePhotoUrl = profileUrl, 
+
                 EmailConfirmed = false,
-                // 2. Set OTP fields here so they get saved immediately
                 OtpCode = otp,
                 OtpExpiration = DateTime.UtcNow.AddMinutes(5)
             };
 
-            // 3. Create the user (this saves the User + OTP fields in one transaction)
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
                 return new APIResponseDto { IsSuccess = false, Message = string.Join(", ", result.Errors.Select(e => e.Description)) };
 
-            // 4. Send Email
-            await _emailService.SendEmailAsync(user.Email, "Confirm your email",
-                $"Your confirmation token is: {otp}");
+            await _emailService.SendEmailAsync(user.Email, "Confirm your email", $"Your OTP is: {otp}");
 
-            return new APIResponseDto { IsSuccess = true, Message = "User registered. Please check email for verification code." };
+            return new APIResponseDto { IsSuccess = true, Message = "User registered successfully." };
         }
 
         // VERIFY EMAIL
