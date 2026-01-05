@@ -17,7 +17,7 @@ namespace Martaarcadu.API.Controllers
 
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDto dto)
+        public async Task<IActionResult> Register([FromForm] UserRegistrationDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
