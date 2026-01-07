@@ -149,6 +149,69 @@ namespace Martaarcadu.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Martaarcadu.Domain.Entities.Chat.ChatMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("Martaarcadu.Domain.Entities.Chat.Conversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastMessageAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ParticipantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PostOwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("PostOwnerId");
+
+                    b.ToTable("Conversations");
+                });
+
             modelBuilder.Entity("Martaarcadu.Domain.Entities.Location.Location", b =>
                 {
                     b.Property<Guid>("Id")
@@ -479,6 +542,52 @@ namespace Martaarcadu.Infrastructure.Migrations
                     b.Navigation("SubscriptionPlan");
                 });
 
+            modelBuilder.Entity("Martaarcadu.Domain.Entities.Chat.ChatMessage", b =>
+                {
+                    b.HasOne("Martaarcadu.Domain.Entities.Chat.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Martaarcadu.Domain.Entities.ApplicationUser.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Martaarcadu.Domain.Entities.Chat.Conversation", b =>
+                {
+                    b.HasOne("Martaarcadu.Domain.Entities.ApplicationUser.ApplicationUser", "Participant")
+                        .WithMany()
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Martaarcadu.Domain.Entities.MarketPlacePost.MarketPlacePost", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Martaarcadu.Domain.Entities.ApplicationUser.ApplicationUser", "PostOwner")
+                        .WithMany()
+                        .HasForeignKey("PostOwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Participant");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("PostOwner");
+                });
+
             modelBuilder.Entity("Martaarcadu.Domain.Entities.Location.Location", b =>
                 {
                     b.HasOne("Martaarcadu.Domain.Entities.MarketPlacePost.MarketPlacePost", "Post")
@@ -580,6 +689,11 @@ namespace Martaarcadu.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Martaarcadu.Domain.Entities.Chat.Conversation", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Martaarcadu.Domain.Entities.MarketPlacePost.MarketPlacePost", b =>
