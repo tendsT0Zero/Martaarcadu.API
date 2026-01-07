@@ -48,5 +48,10 @@ namespace Martaarcadu.Domain.Entities.ApplicationUser
         public string? TermPolicyUrl { get; set; }
 
         public  ICollection<ServiceType>? ServiceTypes { get; set; }
+
+
+        //OTP verifications
+        public string? OtpCode { get; set; }
+        public DateTime? OtpExpiration { get; set; }
     }
 }

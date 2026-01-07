@@ -14,5 +14,10 @@ namespace Martaarcadu.Domain.Enums
             Yearly,
             Free
         }
+        public enum PostType
+        {
+            Service,
+            Product
+        }
     }
 }
