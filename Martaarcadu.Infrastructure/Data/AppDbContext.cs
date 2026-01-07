@@ -1,4 +1,5 @@
 ﻿using Martaarcadu.Domain.Entities.ApplicationUser;
+using Martaarcadu.Domain.Entities.Chat;
 using Martaarcadu.Domain.Entities.Location;
 using Martaarcadu.Domain.Entities.MarketPlacePost;
 using Martaarcadu.Domain.Entities.MarketPlacePostCategory;
@@ -28,6 +29,8 @@ namespace Martaarcadu.Infrastructure.Data
         public DbSet<MarketPlacePost> MarketPlacePosts { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<PostImage> PostImages { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
